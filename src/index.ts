@@ -76,6 +76,18 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
+// Webhook for CCR agents (WebFetch POST)
+app.post('/send', async (req: Request, res: Response) => {
+  const { text } = req.body;
+  if (!text) { res.status(400).json({ ok: false, error: 'Missing text' }); return; }
+  try {
+    await sendTelegramMessage(text);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
 // MCP endpoint — each request gets its own stateless server instance
 app.all('/mcp', async (req: Request, res: Response) => {
   const server = createMcpServer();
